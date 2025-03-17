@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from discord.ext import commands
 from datetime import datetime
 
+
 intents = discord.Intents.default()
 intents.members = True  # Pour capturer les changements d'utilisateur
 intents.voice_states = True  # Pour les événements des salons vocaux
@@ -15,6 +16,14 @@ intents.message_content = True  # Pour capturer le contenu des messages
 load_dotenv()
 bot_token = os.getenv('DISCORD_TOKEN')
 LOG_CHANNEL_ID = int(os.getenv('LOG_CHANNEL_ID'))
+
+print(f"Token: {bot_token}")  # Affiche le token pour vérifier
+print(f"Log Channel ID: {LOG_CHANNEL_ID}")  # Affiche l'ID du channel
+
+if bot_token is None:
+    print("Erreur : Token Discord non trouvé.")
+if LOG_CHANNEL_ID is None:
+    print("Erreur : Log Channel ID non trouvé.")
 
 
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -56,7 +65,7 @@ async def on_voice_state_update(member, before, after):
             else:
                 duration_str = f"{minutes}m {seconds}s"  # Format sans les heures
 
-        embed = discord.Embed(title="Sortie du salon vocal", color=0xbb2626)
+        embed = discord.Embed(title="Départ du salon vocal", color=0xbb2626)
         embed.set_thumbnail(url=member.avatar.url if member.avatar else member.default_avatar.url)  # Photo de profil
         embed.add_field(name="", value=f"📤 {member.mention} a quitté le salon vocal {before.channel.mention}.", inline=False)
         embed.add_field(name="ID's", value=f"> {member.mention} (`{member.id}`)\n > {before.channel.mention} (`{before.channel.id}`)", inline=False)
@@ -128,7 +137,7 @@ async def on_member_update(before, after):
 
             # S'il y a des rôles reçus
             if new_roles:  
-                embed = discord.Embed(title="🎉 Rôle reçu", color=0x3b9c2d)
+                embed = discord.Embed(title="Rôle reçu", color=0x3b9c2d)
                 embed.set_author(name=f"{after.name}", icon_url=after.avatar.url if after.avatar else after.default_avatar.url)
                 embed.add_field(name="", value=", ".join([role.mention for role in new_roles]), inline=False)
 
@@ -171,7 +180,7 @@ async def on_member_update(before, after):
 
             # S'il y a des rôles retirés
             if removed_roles:
-                embed = discord.Embed(title="❌ Rôle retiré", color=0xbb2626)
+                embed = discord.Embed(title="Rôle retiré", color=0xbb2626)
                 embed.set_author(name=f"{after.name}", icon_url=after.avatar.url if after.avatar else after.default_avatar.url)
                 embed.add_field(name="", value=", ".join([role.mention for role in removed_roles]), inline=False)
 
@@ -395,3 +404,8 @@ async def on_member_remove(member):
     embed.set_footer(text=f"{bot.user}", icon_url=bot.user.avatar.url)
 
     await channel.send(embed=embed)
+
+try:
+    bot.run(bot_token)
+except Exception as e:
+    print(f"Erreur lors du lancement du bot : {e}")
